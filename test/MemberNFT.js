@@ -38,4 +38,7 @@ describe("MemberNFT Contract", function() {
     it("owner以外はmintできない", async function() {
         await expect(memberNFT.connect(addr1).nftMint(addr1.address, tokenURI1)).to.be.revertedWith("Ownable: caller is not the owner");
     });
+    it("nint後にTokenURIChangedイベントが発行される", async function() {
+        await expect(memberNFT.nftMint(addr1.address, tokenURI1)).to.emit(memberNFT, "TokenURIChanged").withArgs(addr1.address, 1, tokenURI1);
+    })
 })
