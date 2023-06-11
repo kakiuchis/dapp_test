@@ -14,4 +14,23 @@ contract TokenBank {
     // TokenBankの残高
     mapping(address => uint256) private _tokenBankBalances;
 
+    // Tokenのユーザー→ユーザー移転ログ
+    event TokenTransfar(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
+    // Tokenのユーザー→Bank移転ログ
+    event TokenDeposit(
+        address indexed from,
+        uint256 amount
+    );
+
+    // TokenのBank→ユーザー移転ログ
+    event TokenWithdraw(
+        address indexed from,
+        uint256 amount
+    );
+
 }
