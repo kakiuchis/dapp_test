@@ -9,7 +9,7 @@ contract TokenBank {
     uint256 private _bankTotalDeposit;
     address public owner;
 
-    //アドレスのToken残高
+    // アドレスのToken残高
     mapping(address => uint256) private _balances;
     // TokenBankの残高
     mapping(address => uint256) private _tokenBankBalances;
@@ -38,6 +38,26 @@ contract TokenBank {
         _symbol = symbol_;
         owner = msg.sender;
         _balances[owner] = _totalSupply;
+    }
+
+    // nameを返すfunction
+    function name() public view returns (string memory) {
+        return _name;
+    }
+
+    // symbolを返すfunction
+    function symbol() public view returns (string memory) {
+        return _symbol;
+    }
+
+    // totalSupplyを返すfunction
+    function totalSupply() public pure returns (uint256) {
+        return _totalSupply;
+    }
+
+    // アドレスの残高を返すfunction
+    function balanceOf(address account) public view returns (uint256) {
+        return _balances[account];
     }
 
 }
