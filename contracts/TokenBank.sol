@@ -60,4 +60,19 @@ contract TokenBank {
         return _balances[account];
     }
 
+    // Token移転function
+    function transfar(address to, uint256 amount) public {
+        address from = msg.sender;
+        _transfar(from, to, amount);
+    }
+
+    // Token移転の内部関数
+    function _transfar(address from, address to, uint256 amount) internal {
+        require(to != address(0), "Zero address cannot transfar.");
+        uint256 fromBalance = _balances[from];
+        require(fromBalance >= amount, "Your money is running low.");
+        _balances[from] = fromBalance - amount;
+        _balances[to] += amount;
+        emit TokenTransfar(from, to, amount);
+    }
 }
