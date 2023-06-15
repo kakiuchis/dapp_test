@@ -11,8 +11,8 @@ const main = async () => {
     const tokenURI4 = "ipfs://bafybeigyod7ldrnytkzrw45gw2tjksdct6qaxnsc7jdihegpnk2kskpt7a/metadata4.json"
     const tokenURI5 = "ipfs://bafybeigyod7ldrnytkzrw45gw2tjksdct6qaxnsc7jdihegpnk2kskpt7a/metadata5.json"
 
-    MemberNFT = await ethers.getContractFactory("MemberNFT");
-    memberNFT = await MemberNFT.deploy();
+    const MemberNFT = await ethers.getContractFactory("MemberNFT");
+    const memberNFT = await MemberNFT.deploy();
     await memberNFT.deployed();
 
     console.log(`Contract deployed to: https://mumbai.polygonscan.com/address/${memberNFT.address}`);
