@@ -5,13 +5,13 @@ pragma solidity ^0.8.9;
 contract TokenBank {
     string private _name;
     string private _symbol;
-    uint256 constant _totalSupply = 1000;
-    uint256 private _bankTotalDeposit;
+    uint256 constant _totalSupply = 1000; // Token発行上限
+    uint256 private _bankTotalDeposit; // 銀行残高トータル
     address public owner;
 
-    // アドレスのToken残高
+    // アドレスとToken残高の辞書型配列
     mapping(address => uint256) private _balances;
-    // TokenBankの残高
+    // アドレスと銀行残高の辞書型配列
     mapping(address => uint256) private _tokenBankBalances;
 
     // Tokenのユーザー→ユーザー移転ログ
@@ -74,5 +74,26 @@ contract TokenBank {
         _balances[from] = fromBalance - amount;
         _balances[to] += amount;
         emit TokenTransfar(from, to, amount);
+    }
+
+    // 銀行残高トータルを返す
+    function bankTotalDeposit() public view returns (uint256) {
+        return _bankTotalDeposit;
+    }
+
+    // アドレス別の銀行残高を返す
+    function bankBalanceOf(address account) public view returns (uint256) {
+        return _tokenBankBalances[account];
+    }
+
+    // トークンを銀行に預ける
+    function deposit(uint256 amount) public {
+        address from = msg.sender;
+        address to = owner;
+
+        _transfar(from, to, amount);
+        _tokenBankBalances[from] += amount;
+        _bankTotalDeposit += amount;
+        emit TokenDeposit(from, amount);
     }
 }
