@@ -58,7 +58,7 @@ describe("TokenBank Contract", function() {
             await expect(tokenBank.connect(addr1).transfar(addr2.address, 100)).to.emit(tokenBank, "TokenTransfar").withArgs(addr1.address, addr2.address, 100);
         });
     });
-    describe("アドレス→BankのToken移転", function(){
+    describe("アドレス、Bank間のToken移転", function(){
         beforeEach(async function(){
             await tokenBank.transfar(addr1.address, 500);
             await tokenBank.transfar(addr2.address, 200);
@@ -83,6 +83,21 @@ describe("TokenBank Contract", function() {
         });
         it("Token預入後、eventが発行される", async function() {
             await expect(tokenBank.connect(addr1).deposit(100)).to.emit(tokenBank, "TokenDeposit").withArgs(addr1.address, 100);
+        });
+        it("Token引き出しが成功する", async function() {
+            const startBankBalance = await tokenBank.bankBalanceOf(addr1.address);
+            const startTotalBankBalance = await tokenBank.bankTotalDeposit();
+            await tokenBank.connect(addr1).withdraw(100);
+            const endBankBalance = await tokenBank.bankBalanceOf(addr1.address);
+            const endTotalBankBalance = await tokenBank.bankTotalDeposit();
+            expect(endBankBalance).to.equal(startBankBalance.sub(100));
+            expect(endTotalBankBalance).to.equal(startTotalBankBalance.sub(100));
+        });
+        it("残高不足の場合、引き出し失敗する", async function() {
+            await expect(tokenBank.connect(addr1).withdraw(101)).to.be.revertedWith("Money is not enough.");
+        });
+        it("Token引き出し後、eventが発行される", async function() {
+            await expect(tokenBank.connect(addr1).withdraw(100)).to.emit(tokenBank, "TokenWithdraw").withArgs(addr1.address, 100);
         });
     });
 
