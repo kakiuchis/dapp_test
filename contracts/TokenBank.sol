@@ -2,7 +2,13 @@
 
 pragma solidity ^0.8.9;
 
+interface MemberToken {
+    function balanceOf(address owner) external view returns (uint256);
+}
+
 contract TokenBank {
+    MemberToken public memberToken;
+
     string private _name;
     string private _symbol;
     uint256 constant _totalSupply = 1000; // Token発行上限
@@ -33,11 +39,24 @@ contract TokenBank {
         uint256 amount
     );
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_, address nftContract_) {
         _name = name_;
         _symbol = symbol_;
         owner = msg.sender;
         _balances[owner] = _totalSupply;
+        memberToken = MemberToken(nftContract_);
+    }
+
+    // NFTメンバーであることの審査
+    modifier onlyMember() {
+        require(memberToken.balanceOf(msg.sender) > 0, "You are not a member");
+        _;
+    }
+
+    // owner以外であることの審査
+    modifier notOwner() {
+        require(owner != msg.sender, "Owner cannot excecute");
+        _;
     }
 
     // nameを返すfunction
@@ -61,7 +80,10 @@ contract TokenBank {
     }
 
     // Token移転function
-    function transfar(address to, uint256 amount) public {
+    function transfar(address to, uint256 amount) public onlyMember {
+        if (owner == msg.sender) {
+            require(_balances[owner] - _bankTotalDeposit >= amount, "amount over");
+        }
         address from = msg.sender;
         _transfar(from, to, amount);
     }
@@ -87,7 +109,7 @@ contract TokenBank {
     }
 
     // トークンを銀行に預ける
-    function deposit(uint256 amount) public {
+    function deposit(uint256 amount) public onlyMember notOwner {
         address from = msg.sender;
         address to = owner;
 
@@ -98,7 +120,7 @@ contract TokenBank {
     }
 
     // トークンを銀行から引き出す
-    function withdraw(uint256 amount) public {
+    function withdraw(uint256 amount) public onlyMember notOwner {
         address to = msg.sender;
         address from = owner;
         uint256 toTokenBankBlance = _tokenBankBalances[to];

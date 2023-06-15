@@ -2,6 +2,13 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("TokenBank Contract", function() {
+    let MemberNFT;
+    let memberNFT;
+    const tokenURI1 = "xxxxxxxxx_1";
+    const tokenURI2 = "xxxxxxxxx_2";
+    const tokenURI3 = "xxxxxxxxx_3";
+    const tokenURI4 = "xxxxxxxxx_4";
+    const tokenURI5 = "xxxxxxxxx_5";
     let TokenBank;
     let tokenBank;
     const name = "Token";
@@ -14,8 +21,16 @@ describe("TokenBank Contract", function() {
 
     beforeEach(async function() {
         [owner, addr1, addr2, addr3] = await ethers.getSigners();
+        MemberNFT = await ethers.getContractFactory("MemberNFT");
+        memberNFT = await MemberNFT.deploy();
+        await memberNFT.deployed();
+        await memberNFT.nftMint(owner.address, tokenURI1);
+        await memberNFT.nftMint(addr1.address, tokenURI2);
+        await memberNFT.nftMint(addr1.address, tokenURI3);
+        await memberNFT.nftMint(addr2.address, tokenURI4);
+
         TokenBank = await ethers.getContractFactory("TokenBank");
-        tokenBank = await TokenBank.deploy(name, symbol);
+        tokenBank = await TokenBank.deploy(name, symbol, memberNFT.address);
         await tokenBank.deployed();
     });
 
@@ -98,6 +113,24 @@ describe("TokenBank Contract", function() {
         });
         it("Token引き出し後、eventが発行される", async function() {
             await expect(tokenBank.connect(addr1).withdraw(100)).to.emit(tokenBank, "TokenWithdraw").withArgs(addr1.address, 100);
+        });
+        it("ownerは預入できない", async function() {
+            await expect(tokenBank.deposit(1)).to.be.revertedWith("Owner cannot excecute")
+        });
+        it("ownerは引き出しできない", async function() {
+            await expect(tokenBank.withdraw(1)).to.be.revertedWith("Owner cannot excecute")
+        });
+        it("ownerは銀行トータル預入より大きいTokenを移転できない", async function() {
+            await expect(tokenBank.transfar(addr1.address, 201)).to.be.revertedWith("amount over")
+        });
+        it("member以外は移転できない", async function() {
+            await expect(tokenBank.connect(addr3).transfar(addr1.address, 100)).to.be.revertedWith("You are not a member")
+        });
+        it("member以外は預入できない", async function() {
+            await expect(tokenBank.connect(addr3).deposit(1)).to.be.revertedWith("You are not a member")
+        });
+        it("member以外は引き出しできない", async function() {
+            await expect(tokenBank.connect(addr3).withdraw(1)).to.be.revertedWith("You are not a member")
         });
     });
 
