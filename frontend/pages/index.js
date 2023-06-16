@@ -58,6 +58,7 @@ export default function Home() {
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
       const tokenBankContract = new ethers.Contract(tokenBankAddress, TokenBank.abi, signer);
+
       const tBalance = await tokenBankContract.balanceOf(accounts[0]);
       console.log(`tBalance: ${tBalance}`);
       setTokenBalance(tBalance.toNumber());
@@ -70,6 +71,7 @@ export default function Home() {
       console.log(`toatalDeposit: ${toatalDeposit}`);
       setBankTotalDeposit(toatalDeposit.toNumber());
 
+      checkNFT(accounts[0]);
       ethereum.on('accountsChanged', checkAccountChanged);
       ethereum.on('chainChanged', checkChainId);
     } catch (err) {
@@ -85,6 +87,20 @@ export default function Home() {
     setBankBalance('');
     setBankTotalDeposit('');
     setInputData({ transferAddress: '', transferAmount: '', depositAmount: '', withdrawAmount: '' });
+  }
+
+  const checkNFT = async (addr) => {
+    const { ethereum } = window;
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    const nftContract = new ethers.Contract(memberNFTAddress, MemberNFT.abi, signer);
+
+    const balance = await nftContract.balanceOf(addr);
+    console.log(`nftBalance: ${balance}`);
+
+    if (balance.toNumber() > 0) {
+      setNftOwner(true)
+    } else {''}
   }
 
   useEffect(()=>{
